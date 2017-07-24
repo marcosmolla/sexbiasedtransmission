@@ -82,6 +82,6 @@ res_d <- do.call(rbind, res) %>% as.data.frame()
 names(res_d) <- c("trait", "skew", "variance2")
 # Plot results
 p <- ggplot(res_d, aes(skew, variance2)) + geom_tile(aes(fill = trait)) + scale_fill_viridis(); p
-# save_plot(p, filename="~/Desktop/tst.png", base_width=5)
+# save_plot(p, filename="~/Dropbox/Programming/sexbiasedtransmission/sbt_reproductiveSkew.png", base_width=5)
 
 # ggplot(data.frame(x1=rnorm(n=10^5, mean=.5,sd=.25), x2=rnorm(n=10^5, mean=.5,sd=.01))) + geom_density(aes(x1), fill="blue",alpha=.5) + geom_density(aes(x2), fill="red", alpha=.5) + scale_x_continuous(limits=c(0,1))
