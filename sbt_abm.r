@@ -5,7 +5,7 @@ library(cowplot) # not required, but makes the plots nicer
 library(viridis) # for neater colours when plotting
 
 # Set global parameters
-n <- 1000 						# number of individuals
+n <- 100	  					# number of individuals
 var1 <- .25						# variance of frist distribution (accessible without trait)
 var2 <- 0.5						# variance of second distribution (accessible with trait)
 gamma <- 1/n 					# death rate
@@ -33,9 +33,15 @@ game <- function(S,v2){
   	# Forage
   		## Foragers w/o trait
   		n_t <- sum(trait)
-  		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) / (n-n_t) 
+  		  # Single foraging bout per round
+    		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) #/ (n-n_t)
+  		  # Multiple foraging bouts per round
+    		# payoffs[!trait] <- rnorm(n=(n-n_t)*10, mean=0.5, sd=var1) %>% matrix(., ncol=(n-n_t)) %>% colMeans() %>% hist()
   		## Foragers with the trait
-  		payoffs[ trait] <- rnorm(n=  n_t, mean=0.5, sd=v2  ) / (  n_t)
+    		# Sinle foraging bout per round
+    		payoffs[ trait] <- rnorm(n=  n_t   , mean=0.5, sd=v2  ) #/ (  n_t)
+    		# Multiple foraging bouts per round
+    		# payoffs[ trait] <- rnorm(n=  n_t*10, mean=0.5, sd=v2) %>% matrix(., ncol=(n-n_t)) %>% colMeans()
   		# Set payoffs in [0,1]
   		payoffs[payoffs<0] <- 0
   		payoffs[payoffs>1] <- 1
@@ -51,8 +57,8 @@ game <- function(S,v2){
   	
   	# Choose individuals to reproduce (exclude dead individuals)
   		# For skew define who is eligible
-  		# noreproduce <- -c(dead, which(payoffs<S))
-  		noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
+  		noreproduce <- -c(dead, which(payoffs<S))
+  		# noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
   		reproduce <- sample((1:n)[noreproduce], size=length(dead), replace=F, prob=fitness[noreproduce]) #death rate
   	
   	# Set trait for new individual
