@@ -34,36 +34,38 @@ game <- function(S,v2){
   		## Foragers w/o trait
   		n_t <- sum(trait)
   		  # Single foraging bout per round
-    		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) #/ (n-n_t)
+      		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) #/ (n-n_t)
   		  # Multiple foraging bouts per round
-    		# payoffs[!trait] <- rnorm(n=(n-n_t)*10, mean=0.5, sd=var1) %>% matrix(., ncol=(n-n_t)) %>% colMeans() %>% hist()
+      		# payoffs[!trait] <- rnorm(n=(n-n_t)*10, mean=0.5, sd=var1) %>% matrix(., ncol=(n-n_t)) %>% colMeans() %>% hist()
   		## Foragers with the trait
     		# Sinle foraging bout per round
-    		payoffs[ trait] <- rnorm(n=  n_t   , mean=0.5, sd=v2  ) #/ (  n_t)
+    	  	payoffs[ trait] <- rnorm(n=  n_t   , mean=0.5, sd=v2  ) #/ (  n_t)
     		# Multiple foraging bouts per round
-    		# payoffs[ trait] <- rnorm(n=  n_t*10, mean=0.5, sd=v2) %>% matrix(., ncol=(n-n_t)) %>% colMeans()
-  		# Set payoffs in [0,1]
+    		  # payoffs[ trait] <- rnorm(n=  n_t*10, mean=0.5, sd=v2) %>% matrix(., ncol=(n-n_t)) %>% colMeans()
+  		
+  	# Set payoffs to be between [0,1]
   		payoffs[payoffs<0] <- 0
   		payoffs[payoffs>1] <- 1
-  	
   		
   	# Choose individuals to die
   		dead <- sample(1:n, size=gamma*n, replace=F) #death rate
   		# Delete payoff of dead individual
-  		payoffs[dead] <- 0
+    		payoffs[dead] <- 0
   		
   	# Calculate fitness
   		fitness <- payoffs/sum(payoffs)
   	
   	# Choose individuals to reproduce (exclude dead individuals)
-  		# For skew define who is eligible
-  		noreproduce <- -c(dead, which(payoffs<S))
-  		# noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
-  		reproduce <- sample((1:n)[noreproduce], size=length(dead), replace=F, prob=fitness[noreproduce]) #death rate
+  		# For skew define who is eligible to reproduce
+    		noreproduce <- -c(dead, which(payoffs<S))
+    		# noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
+  		# Select individual(s) that reproduce
+    		reproduce <- sample((1:n)[noreproduce], size=length(dead), replace=F, prob=fitness[noreproduce]) #death rate
   	
   	# Set trait for new individual
   		trait[dead] <- trait[reproduce]
   	}
+	# Record trait frequency
   	trait_t[k] <- mean(trait)
   }
 	return(c(mean(trait_t), S, v2))
