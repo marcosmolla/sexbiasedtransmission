@@ -6,56 +6,60 @@ library(viridis) # for neater colours when plotting
 
 # Set global parameters
 n <- 1000 						# number of individuals
-var1 <- .25							# variance of frist distribution (accessible without trait)
+var1 <- .25						# variance of frist distribution (accessible without trait)
 var2 <- 0.5						# variance of second distribution (accessible with trait)
 gamma <- 1/n 					# death rate
 # s <- 0.51							# skew
 # mu <- 0.01						# mutation rate
 trait_freq <- 0.5			# initial frequency of trait
 rounds <- 1000				# rounds of the game
-games <- 20					# number of games
+games <- 20				  	# number of games
 trait_t <- 1:games 	  # to record trait frequency
 
 
-game <- function(S,v2){
-	for(k in 1:games){
-	# Initiate
+## Defining the simulation loop as a function; 
+# S: skew, v2: payoff variance of the trait
+game <- function(S,v2){ 
+  # looping over k number of games
+	for(k in 1:games){ 
+	# Initiate vector to store payoffs, fitness, presence of trait
 	payoffs <- rep(NA, n)
 	fitness <- rep(NA, n)
 	trait <- rep(F, n)
 	trait[1:(n*trait_freq)] <- T
 	
-	for(t in 1:rounds){
-	# Forage
-		## Foragers w/o trait
-		n_t <- sum(trait)
-		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) / (n-n_t) 
-		## Foragers with the trait
-		payoffs[ trait] <- rnorm(n=  n_t, mean=0.5, sd=v2  ) / (  n_t)
-		# Set payoffs in [0,1]
-		payoffs[payoffs<0] <- 0
-		payoffs[payoffs>1] <- 1
-	
-		
-	# Choose individuals to die
-		dead <- sample(1:n, size=gamma*n, replace=F) #death rate
-		# Delete payoff of dead individual
-		payoffs[dead] <- 0
-		
-	# Calculate fitness
-		fitness <- payoffs/sum(payoffs)
-	
-	# Choose individuals to reproduce (exclude dead individuals)
-		# For skew define who is eligible
-		# noreproduce <- -c(dead, which(payoffs<S))
-		noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
-		reproduce <- sample((1:n)[noreproduce], size=length(dead), replace=F, prob=fitness[noreproduce]) #death rate
-	
-	# Set trait for new individual
-		trait[dead] <- trait[reproduce]
-	}
-	trait_t[k] <- mean(trait)
-}
+  	# looping over t number of rounds
+  	for(t in 1:rounds){
+  	# Forage
+  		## Foragers w/o trait
+  		n_t <- sum(trait)
+  		payoffs[!trait] <- rnorm(n=n-n_t, mean=0.5, sd=var1) / (n-n_t) 
+  		## Foragers with the trait
+  		payoffs[ trait] <- rnorm(n=  n_t, mean=0.5, sd=v2  ) / (  n_t)
+  		# Set payoffs in [0,1]
+  		payoffs[payoffs<0] <- 0
+  		payoffs[payoffs>1] <- 1
+  	
+  		
+  	# Choose individuals to die
+  		dead <- sample(1:n, size=gamma*n, replace=F) #death rate
+  		# Delete payoff of dead individual
+  		payoffs[dead] <- 0
+  		
+  	# Calculate fitness
+  		fitness <- payoffs/sum(payoffs)
+  	
+  	# Choose individuals to reproduce (exclude dead individuals)
+  		# For skew define who is eligible
+  		# noreproduce <- -c(dead, which(payoffs<S))
+  		noreproduce <- -c(dead, which(payoffs < quantile(x=payoffs,probs=S)))
+  		reproduce <- sample((1:n)[noreproduce], size=length(dead), replace=F, prob=fitness[noreproduce]) #death rate
+  	
+  	# Set trait for new individual
+  		trait[dead] <- trait[reproduce]
+  	}
+  	trait_t[k] <- mean(trait)
+  }
 	return(c(mean(trait_t), S, v2))
 }
 
